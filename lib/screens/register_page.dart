@@ -37,7 +37,8 @@ class _RegisterState extends ConsumerState<Register> {
       if (_formKey.currentState!.validate()) {
         _formKey.currentState!.save();
 
-        final url = Uri.parse('http://127.0.0.1:8000/api/user/register/');
+        final url =
+            Uri.parse('https://randojavabackend.zeabur.app/api/user/register/');
         var response = await http.post(url,
             // headers: {
             //   'Content-Type': 'application/json',
@@ -51,15 +52,16 @@ class _RegisterState extends ConsumerState<Register> {
         if (token != null) {
           saveToken(token);
           String auth_token = 'token $token';
-          final response = await http
-              .get(Uri.parse('http://127.0.0.1:8000/api/user/me/'), headers: {
-            'Authorization': auth_token,
-          });
+          final response = await http.get(
+              Uri.parse('https://randojavabackend.zeabur.app/api/user/me/'),
+              headers: {
+                'Authorization': auth_token,
+              });
           String UserId = jsonDecode(response.body)['id'];
 
           ref.read(authStateProvider.notifier).login();
           // final _channel = WebSocketService()
-          //     .create('ws://127.0.0.1:8000/chatRoomMessages/${UserId}/');
+          //     .create('ws://randojavabackend.zeabur.app/chatRoomMessages/${UserId}/');
           const chatroomList = '';
           Navigator.of(context).push(MaterialPageRoute(
               builder: (ctx) => MainPageScreen(

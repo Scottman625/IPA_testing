@@ -53,7 +53,7 @@ class User {
       age: json['age'] ?? 18,
       career: json['career'] ?? '',
       aboutMe: json['aboutMe'] ?? '',
-      totalLikesCount: json['totalLikesCount'] ?? 0,
+      totalLikesCount: json['likesCount'] ?? 0,
       otherSideImageUrl: json['otherSideImageUrl'] ?? '',
     );
   }

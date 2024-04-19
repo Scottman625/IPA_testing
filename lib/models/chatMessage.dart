@@ -7,9 +7,10 @@ class ChatRoom {
   final String lastMessage;
   int unreadNums;
   final DateTime lastMessageTime;
-  final User otherSideUser;
+  final String otherSideUserPhone;
   final int otherSideAge;
   final String otherSideCareer;
+  final String otherSideAbout;
   String currentUserId;
 
   ChatRoom({
@@ -19,9 +20,10 @@ class ChatRoom {
     required this.lastMessage,
     required this.unreadNums,
     required this.lastMessageTime,
-    required this.otherSideUser,
+    required this.otherSideUserPhone,
     required this.otherSideAge,
     required this.otherSideCareer,
+    required this.otherSideAbout,
     required this.currentUserId,
   });
 
@@ -32,15 +34,16 @@ class ChatRoom {
         'lastMessage': lastMessage,
         'lastMessageTime': lastMessageTime.toIso8601String(),
         'unreadNums': unreadNums,
-        'otherSideUser': otherSideUser.toJson(),
+        'otherSideUser': otherSideUserPhone,
         'otherSideAge': otherSideAge,
         'otherSideCareer': otherSideCareer,
+        'otherSideAbout': otherSideAbout,
         'currentUserId': currentUserId,
       };
 
   factory ChatRoom.fromJson(Map<String, dynamic> json) {
     return ChatRoom(
-        id: json['id'] ?? json['chatRoom']['id'],
+        id: json['chatroomId'] ?? json['id'],
         otherSideImageUrl: json['otherSideImageUrl'] != null
             ? json['otherSideImageUrl']
             : json['otherSideImageUrl'],
@@ -52,13 +55,10 @@ class ChatRoom {
         lastMessageTime: json['lastMessageTime'] != null
             ? DateTime.parse(json['lastMessageTime'])
             : DateTime.now(),
-        otherSideUser: json['otherSideUser'] != null
-            ? User.fromJson(json['otherSideUser'])
-            : User.fromJson(json['otherSideUser']),
+        otherSideUserPhone: json['otherSideUserPhone'] ?? "",
         otherSideAge: json['otherSideAge'] ?? json['otherSideUser']['age'],
-        otherSideCareer: json['otherSideUser'] != null
-            ? json['otherSideUser']['career']
-            : json['otherSideCareer'],
+        otherSideCareer: json['otherSideCareer'] ?? "",
+        otherSideAbout: json['otherSideAbout'] ?? "",
         currentUserId: json['currentUser'] != null
             ? json['currentUser']['id'].toString()
             : json['currentUserId'].toString());

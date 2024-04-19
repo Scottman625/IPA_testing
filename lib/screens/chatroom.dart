@@ -94,8 +94,8 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     print("接收對象數據");
 
     String url =
-        'http://127.0.0.1:8000/api/chatroom/${chatroomId.toString()}/?is_chat=no';
-    // 'http://127.0.0.1:8000/api/chatroom/${chatroomId.toString()}';
+        'https://randojavabackend.zeabur.app/api/chatroom/${chatroomId.toString()}/?is_chat=no';
+    // 'https://randojavabackend.zeabur.app/api/chatroom/${chatroomId.toString()}';
 
     final response = await http.get(
       Uri.parse(url),
@@ -125,7 +125,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
       try {
         final response = await http.post(
             Uri.parse(
-                'http://127.0.0.1:8000/api/messages?chatroomId=${chatroomId.toString()}'),
+                'https://randojavabackend.zeabur.app/api/messages?chatroomId=${chatroomId.toString()}'),
             headers: {
               'Authorization': authToken,
             },
@@ -143,7 +143,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
       var request = http.MultipartRequest(
         'POST',
         Uri.parse(
-            'http://127.0.0.1:8000/api/messages?chatroom_id=${chatroomId.toString()}'),
+            'https://randojavabackend.zeabur.app/api/messages?chatroomId=${chatroomId.toString()}'),
       );
 
       request.headers.addAll({
@@ -191,7 +191,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     WidgetsBinding.instance.removeObserver(this);
     webSocketServiceNotifier?.disconnectWebSocket();
     String url =
-        'http://127.0.0.1:8000/api/refresh_chatMessages?chatroom_id=${widget.chatroomId}';
+        'https://randojavabackend.zeabur.app/api/refresh_chatMessages?chatroom_id=${widget.chatroomId}';
     final response = await http.post(
       Uri.parse(url),
       headers: {
@@ -208,7 +208,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     print('初始化Messages數據');
     // ChatRoom chatroom = await fetchOtherSideUserData(widget.chatroomId);
     String url =
-        'http://127.0.0.1:8000/api/messages?chatroom_id=${widget.chatroomId}';
+        'https://randojavabackend.zeabur.app/api/messages?chatroom_id=${widget.chatroomId}';
     final response = await http.get(
       Uri.parse(url),
       headers: {
@@ -543,7 +543,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                               child: Padding(
                                 padding: const EdgeInsets.only(top: 4.0),
                                 child: Text(
-                                  '${asyncSnapshot.data!.otherSideUser.name} ${asyncSnapshot.data!.otherSideAge}',
+                                  '${asyncSnapshot.data!.otherSideName} ${asyncSnapshot.data!.otherSideAge}',
                                   style: const TextStyle(fontSize: 20),
                                 ),
                               ),
@@ -551,20 +551,19 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                             SizedBox(
                               width: MediaQuery.of(context).size.width * 0.5,
                               child: Text(
-                                '3km, 台南 ${asyncSnapshot.data!.otherSideUser.career}',
+                                '3km, 台南 ${asyncSnapshot.data!.otherSideCareer}',
                                 style: const TextStyle(color: Colors.black45),
                               ),
                             ),
                             SizedBox(
                               width: MediaQuery.of(context).size.width * 0.5,
                               child: Text(
-                                asyncSnapshot.data!.otherSideUser.aboutMe
-                                    .substring(
-                                        0,
-                                        min(
-                                            24,
-                                            asyncSnapshot.data!.otherSideUser
-                                                .aboutMe.length)),
+                                asyncSnapshot.data!.otherSideAbout.substring(
+                                    0,
+                                    min(
+                                        24,
+                                        asyncSnapshot
+                                            .data!.otherSideAbout.length)),
                                 style: const TextStyle(fontSize: 16),
                                 // textAlign:
                                 //     TextAlign
@@ -627,44 +626,58 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                                     ),
                                   ),
                             Container(
-                                child: Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(8),
-                                      constraints: BoxConstraints(
-                                        minWidth:
-                                            MediaQuery.of(context).size.width *
-                                                0.25,
-                                        maxWidth:
-                                            MediaQuery.of(context).size.width *
-                                                0.75,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: color,
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: initialData[index - 1].content !=
-                                              ''
-                                          ? Text(
-                                              initialData[index - 1].content!,
-                                              style: const TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 18),
-                                              textAlign: TextAlign.center,
-                                            )
-                                          : initialData[index - 1].image != null
-                                              ?
-                                              // ? Text('test')
-                                              Image.network(
-                                                  '${initialData[index - 1].image}')
-                                              : Container(),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ))
+                              padding: const EdgeInsets.all(8),
+                              constraints: BoxConstraints(
+                                minWidth:
+                                    MediaQuery.of(context).size.width * 0.25,
+                                maxWidth:
+                                    MediaQuery.of(context).size.width * 0.75,
+                              ),
+                              decoration: BoxDecoration(
+                                color: color,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: initialData[index - 1].content != ''
+                                  ? Text(
+                                      initialData[index - 1].content!,
+                                      style: const TextStyle(
+                                          color: Colors.black, fontSize: 18),
+                                      textAlign: TextAlign.center,
+                                    )
+                                  : initialData[index - 1].image != null
+                                      ? Image.network(
+                                          initialData[index - 1].image!,
+                                          loadingBuilder: (BuildContext context,
+                                              Widget child,
+                                              ImageChunkEvent?
+                                                  loadingProgress) {
+                                            if (loadingProgress == null) {
+                                              return child; // 图像已完成加载时返回的widget
+                                            } else {
+                                              return Center(
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  value: loadingProgress
+                                                              .expectedTotalBytes !=
+                                                          null
+                                                      ? loadingProgress
+                                                              .cumulativeBytesLoaded /
+                                                          loadingProgress
+                                                              .expectedTotalBytes!
+                                                      : null,
+                                                ),
+                                              ); // 图像加载时返回的widget
+                                            }
+                                          },
+                                          errorBuilder: (BuildContext context,
+                                              Object exception,
+                                              StackTrace? stackTrace) {
+                                            return const Text(
+                                                '加载图片失败'); // 图像加载失败时返回的widget
+                                          },
+                                        )
+                                      : Container(), // 如果没有图像和内容，返回一个空容器
+                            )
                           ],
                         ),
                       ),
@@ -713,7 +726,34 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                                     ?
                                     // ? Text('test')
                                     Image.network(
-                                        '${initialData[index - 1].image}')
+                                        '${initialData[index - 1].image}',
+                                        loadingBuilder: (BuildContext context,
+                                            Widget child,
+                                            ImageChunkEvent? loadingProgress) {
+                                          if (loadingProgress == null) {
+                                            return child; // 图像已完成加载时返回的widget
+                                          } else {
+                                            return Center(
+                                              child: CircularProgressIndicator(
+                                                value: loadingProgress
+                                                            .expectedTotalBytes !=
+                                                        null
+                                                    ? loadingProgress
+                                                            .cumulativeBytesLoaded /
+                                                        loadingProgress
+                                                            .expectedTotalBytes!
+                                                    : null,
+                                              ),
+                                            ); // 图像加载时返回的widget
+                                          }
+                                        },
+                                        errorBuilder: (BuildContext context,
+                                            Object exception,
+                                            StackTrace? stackTrace) {
+                                          return const Text(
+                                              '加载图片失败'); // 图像加载失败时返回的widget
+                                        },
+                                      )
                                     : Container(),
                           ),
                         ],

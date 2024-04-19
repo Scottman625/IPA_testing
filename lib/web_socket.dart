@@ -16,7 +16,8 @@ class WebSocketService {
   BehaviorSubject<dynamic> _subject = BehaviorSubject<dynamic>();
 
   WebSocketService(String url) {
-    String userId = url.split("ws://127.0.0.1:8000/ws/chatRoomMessages/")[1];
+    String userId =
+        url.split("ws://randojavabackend.zeabur.app/ws/chatRoomMessages/")[1];
     stompClient = StompClient(
       config: StompConfig(
         url: url,
@@ -69,6 +70,7 @@ class WebSocketService {
               var map = jsonDecode(jsonString);
               if (map['chatrooms'] != null) {
                 List<dynamic> list = map['chatrooms'];
+                print(list);
 
                 List<ChatRoom> chatRooms =
                     list.map((e) => ChatRoom.fromJson(e)).toList();
@@ -97,6 +99,7 @@ class WebSocketService {
             try {
               var map = jsonDecode(jsonString);
               List<dynamic> list = map['messages'] ?? [];
+              print(list);
 
               List<ChatMessage> messages =
                   list.map((e) => ChatMessage.fromJson(e)).toList();
