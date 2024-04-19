@@ -55,12 +55,13 @@ dependencies:
   cached_network_image: ^3.2.3
   sqflite_common_ffi: ^2.2.5
   amplify_storage_s3: ^1.2.1
-  flutter_slidable:
-    git:
-      url: https://github.com/Scottman625/flutter_slidable.git
-      ref: 381cae53eef54802f0615adf78d11b7dbfde205a
+  # flutter_slidable:
+  # git:
+  #   url: https://github.com/Scottman625/flutter_slidable.git
+  #   ref: 381cae53eef54802f0615adf78d11b7dbfde205a
   ionicons: ^0.2.2
   stomp_dart_client: ^1.0.0
+  flutter_slidable: ^3.1.0
 
 dev_dependencies:
   flutter_test:
