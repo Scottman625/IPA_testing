@@ -61,14 +61,12 @@ class _PhoneLogInState extends ConsumerState<PhoneLogIn> {
               headers: {
                 'Authorization': auth_token,
               });
-          print("=========");
-          print(auth_token);
-          print(jsonDecode(response.body));
-          int UserId = jsonDecode(response.body)['id'];
+          print(response.statusCode);
+          String UserId = jsonDecode(response.body)['data']['userId'];
 
           ref.read(authStateProvider.notifier).login();
 
-          ref.read(userIdProvider.notifier).setUserId(UserId);
+          ref.read(userIdProvider.notifier).setUserId(int.parse(UserId));
 
           final websocketServiceNotifier =
               ref.read(webSocketServiceNotifierProvider);
