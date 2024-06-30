@@ -1,21 +1,25 @@
 import 'package:web_socket_channel/io.dart';
 import 'dart:async';
 import './models/chatMessage.dart';
+import './models/chatRoom.dart';
 import 'package:rxdart/rxdart.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import './screens/chat_list.dart';
 
-class WebSocketService {
+class WebSocketService extends StateNotifier<List<ChatRoom>> {
   // BehaviorSubject<dynamic>? _subject;
   IOWebSocketChannel? _channel;
   // String url = '';
   late StompClient stompClient;
   BehaviorSubject<dynamic> _subject = BehaviorSubject<dynamic>();
 
-  WebSocketService(String url) {
+  WebSocketService(String url) : super([]) {
+    fetchInitialData(url);
     String userId =
         url.split("ws://randojavabackend.zeabur.app/ws/chatRoomMessages/")[1];
     stompClient = StompClient(
@@ -61,6 +65,39 @@ class WebSocketService {
     _subject.close();
   }
 
+  Future<void> fetchInitialData(String url) async {
+    try {
+      List<ChatRoom> initialData = await fetchChatRooms();
+      state = [...state, ...initialData];
+      _subject.add(jsonEncode({'messages': initialData}));
+    } catch (e) {
+      _subject.addError(e);
+    }
+  }
+
+  // Stream<List<ChatRoom>> get chatRoomsStream {
+  //   return _subject.stream.transform(
+  //     StreamTransformer.fromHandlers(
+  //       handleData: (jsonString, sink) {
+  //         if (jsonString != null && jsonString.isNotEmpty) {
+  //           try {
+  //             var map = jsonDecode(jsonString);
+  //             printInParts(map.toString(), 500);
+  //             if (map['chatrooms'] != null) {
+  //               List<dynamic> list = map['chatrooms'];
+
+  //               List<ChatRoom> chatRooms =
+  //                   list.map((e) => ChatRoom.fromJson(e)).toList();
+
+  //               sink.add(chatRooms);
+  //             }
+  //           } catch (e) {}
+  //         }
+  //       },
+  //     ),
+  //   );
+  // }
+
   Stream<List<ChatRoom>> get chatRoomsStream {
     return _subject.stream.transform(
       StreamTransformer.fromHandlers(
@@ -68,16 +105,17 @@ class WebSocketService {
           if (jsonString != null && jsonString.isNotEmpty) {
             try {
               var map = jsonDecode(jsonString);
-              if (map['chatrooms'] != null) {
-                List<dynamic> list = map['chatrooms'];
-                print(list);
+              List<dynamic> list = map['messages'] ?? [];
+              List<ChatRoom> newMessages =
+                  list.map((e) => ChatRoom.fromJson(e)).toList();
 
-                List<ChatRoom> chatRooms =
-                    list.map((e) => ChatRoom.fromJson(e)).toList();
-
-                sink.add(chatRooms);
-              }
-            } catch (e) {}
+              state = [...state, ...newMessages];
+              sink.add(state);
+            } catch (e) {
+              sink.addError(e);
+            }
+          } else {
+            sink.add(state);
           }
         },
       ),
@@ -85,25 +123,17 @@ class WebSocketService {
   }
 
   Stream<List<ChatMessage>> get chatMessageStream {
-    // _subject.stream.listen((data) {
-    //   final filePath =
-    //       '/Users/fangshengjie/Desktop/filename.txt'; // 请替换为实际的文件路径
-
-    //   writeStringToFile('$data', filePath);
-    // });
     return _subject.stream.transform(
       StreamTransformer.fromHandlers(
         handleData: (jsonString, sink) {
-          // print('jsonString: ${jsonString}');
           if (jsonString != null && jsonString.isNotEmpty) {
             try {
               var map = jsonDecode(jsonString);
+              printInParts(map.toString(), 500);
               List<dynamic> list = map['messages'] ?? [];
-              print(list);
 
               List<ChatMessage> messages =
                   list.map((e) => ChatMessage.fromJson(e)).toList();
-              // print('messages: $messages');
               sink.add(messages);
             } catch (e) {
               print('Failed to decode JSON: $e');
@@ -127,7 +157,7 @@ class WebSocketService {
     return _subject != null;
   }
 
-  Stream<dynamic> get stream => _subject!.stream;
+  // Stream<dynamic> get stream => _subject!.stream;
 }
 
 void printInParts(String text, int partLength) {

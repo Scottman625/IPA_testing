@@ -1,4 +1,5 @@
 import 'package:rando/models/chatMessage.dart';
+import 'package:rando/models/chatRoom.dart';
 import 'package:rando/screens/chat_list.dart';
 import '../shared_preferences/shared_preferences.dart';
 import '../HexColor.dart';
@@ -143,7 +144,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
       var request = http.MultipartRequest(
         'POST',
         Uri.parse(
-            'https://randojavabackend.zeabur.app/api/messages?chatroomId=${chatroomId.toString()}'),
+            'https://randojavabackend.zeabur.app/api/messages?chatroom_id=${chatroomId.toString()}'),
       );
 
       request.headers.addAll({
@@ -458,7 +459,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
           });
 
           final messages = snapshot.data ?? [];
-          // print('messages: ${messages}');
+
           if (messages.length <= 7) {
             return SingleChildScrollView(child: ListViewBuilder(messages));
           } else {
@@ -558,12 +559,12 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                             SizedBox(
                               width: MediaQuery.of(context).size.width * 0.5,
                               child: Text(
-                                asyncSnapshot.data!.otherSideAbout.substring(
+                                asyncSnapshot.data!.otherSideUserInfo.substring(
                                     0,
                                     min(
                                         24,
                                         asyncSnapshot
-                                            .data!.otherSideAbout.length)),
+                                            .data!.otherSideUserInfo.length)),
                                 style: const TextStyle(fontSize: 16),
                                 // textAlign:
                                 //     TextAlign
@@ -626,58 +627,44 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                                     ),
                                   ),
                             Container(
-                              padding: const EdgeInsets.all(8),
-                              constraints: BoxConstraints(
-                                minWidth:
-                                    MediaQuery.of(context).size.width * 0.25,
-                                maxWidth:
-                                    MediaQuery.of(context).size.width * 0.75,
-                              ),
-                              decoration: BoxDecoration(
-                                color: color,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: initialData[index - 1].content != ''
-                                  ? Text(
-                                      initialData[index - 1].content!,
-                                      style: const TextStyle(
-                                          color: Colors.black, fontSize: 18),
-                                      textAlign: TextAlign.center,
-                                    )
-                                  : initialData[index - 1].image != null
-                                      ? Image.network(
-                                          initialData[index - 1].image!,
-                                          loadingBuilder: (BuildContext context,
-                                              Widget child,
-                                              ImageChunkEvent?
-                                                  loadingProgress) {
-                                            if (loadingProgress == null) {
-                                              return child; // 图像已完成加载时返回的widget
-                                            } else {
-                                              return Center(
-                                                child:
-                                                    CircularProgressIndicator(
-                                                  value: loadingProgress
-                                                              .expectedTotalBytes !=
-                                                          null
-                                                      ? loadingProgress
-                                                              .cumulativeBytesLoaded /
-                                                          loadingProgress
-                                                              .expectedTotalBytes!
-                                                      : null,
-                                                ),
-                                              ); // 图像加载时返回的widget
-                                            }
-                                          },
-                                          errorBuilder: (BuildContext context,
-                                              Object exception,
-                                              StackTrace? stackTrace) {
-                                            return const Text(
-                                                '加载图片失败'); // 图像加载失败时返回的widget
-                                          },
-                                        )
-                                      : Container(), // 如果没有图像和内容，返回一个空容器
-                            )
+                                child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      constraints: BoxConstraints(
+                                        minWidth:
+                                            MediaQuery.of(context).size.width *
+                                                0.25,
+                                        maxWidth:
+                                            MediaQuery.of(context).size.width *
+                                                0.75,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: color,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: initialData[index - 1].content !=
+                                              ''
+                                          ? Text(
+                                              initialData[index - 1].content!,
+                                              style: const TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 18),
+                                              textAlign: TextAlign.center,
+                                            )
+                                          : initialData[index - 1].image != null
+                                              ?
+                                              // ? Text('test')
+                                              Image.network(
+                                                  '${initialData[index - 1].image}')
+                                              : Container(),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ))
                           ],
                         ),
                       ),
@@ -726,34 +713,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                                     ?
                                     // ? Text('test')
                                     Image.network(
-                                        '${initialData[index - 1].image}',
-                                        loadingBuilder: (BuildContext context,
-                                            Widget child,
-                                            ImageChunkEvent? loadingProgress) {
-                                          if (loadingProgress == null) {
-                                            return child; // 图像已完成加载时返回的widget
-                                          } else {
-                                            return Center(
-                                              child: CircularProgressIndicator(
-                                                value: loadingProgress
-                                                            .expectedTotalBytes !=
-                                                        null
-                                                    ? loadingProgress
-                                                            .cumulativeBytesLoaded /
-                                                        loadingProgress
-                                                            .expectedTotalBytes!
-                                                    : null,
-                                              ),
-                                            ); // 图像加载时返回的widget
-                                          }
-                                        },
-                                        errorBuilder: (BuildContext context,
-                                            Object exception,
-                                            StackTrace? stackTrace) {
-                                          return const Text(
-                                              '加载图片失败'); // 图像加载失败时返回的widget
-                                        },
-                                      )
+                                        '${initialData[index - 1].image}')
                                     : Container(),
                           ),
                         ],

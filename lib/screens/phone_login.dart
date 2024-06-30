@@ -56,17 +56,14 @@ class _PhoneLogInState extends ConsumerState<PhoneLogIn> {
           saveToken(token);
           String auth_token = 'Bearer ${token}';
           final response = await http.get(
-              Uri.parse(
-                  'https://randojavabackend.zeabur.app/api/user/get_user_id/'),
+              Uri.parse('https://randojavabackend.zeabur.app/api/user/me/'),
               headers: {
                 'Authorization': auth_token,
               });
-          print(response.statusCode);
-          String UserId = jsonDecode(response.body)['data']['userId'];
-
+          int UserId = jsonDecode(response.body)['id'];
           ref.read(authStateProvider.notifier).login();
 
-          ref.read(userIdProvider.notifier).setUserId(int.parse(UserId));
+          ref.read(userIdProvider.notifier).setUserId(UserId);
 
           final websocketServiceNotifier =
               ref.read(webSocketServiceNotifierProvider);
