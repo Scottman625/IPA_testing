@@ -28,7 +28,10 @@ Future<List<ChatRoom>> fetchChatRooms() async {
     String body = utf8.decode(response.bodyBytes);
     // print(body);
     Iterable list = json.decode(body);
-    printInParts(list.toString(), 500);
+
+    // // 格式化并打印完整的 JSON 列表
+    // String prettyPrintJson = const JsonEncoder.withIndent('  ').convert(list);
+    // printLongString(prettyPrintJson);
     return list.map((match) => ChatRoom.fromJson(match)).toList();
   } else {
     // If the server response is not a 200 OK,
@@ -52,7 +55,7 @@ Future<List<User>> fetchMatches() async {
     // then parse the JSON.
     String body = utf8.decode(response.bodyBytes);
     Iterable list = json.decode(body);
-    // print(list);
+
     return list.map((match) => User.fromJson(match)).toList();
   } else {
     throw <User>[];
@@ -251,19 +254,30 @@ class _ChatPageScreenState extends ConsumerState<ChatPageScreen> {
   @override
   void initState() {
     super.initState();
-    loadChatRooms(); // This function fetches data and then sets the state.
-  }
-
-  void loadChatRooms() async {
-    var list = await fetchChatRooms();
-    setState(() {
-      // chatRoomList = list;
-      map = jsonEncode({
-        "chatrooms": list,
-        "messages": [],
-      });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final webSocketServiceNotifier =
+          ref.read(webSocketServiceNotifierProvider);
+      webSocketServiceNotifier.fetchInitialData(
+          'ws://randojavabackend.zeabur.app/ws/chatRoomMessages/${widget.userId}');
     });
   }
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   loadChatRooms(); // This function fetches data and then sets the state.
+  // }
+
+  // void loadChatRooms() async {
+  //   var list = await fetchChatRooms();
+  //   setState(() {
+  //     // chatRoomList = list;
+  //     map = jsonEncode({
+  //       "chatrooms": list,
+  //       "messages": [],
+  //     });
+  //   });
+  // }
 
   void navigateToChatroom(String otherSideUser_phone) async {
     final token = await getToken();
@@ -681,5 +695,13 @@ class _ChatPageScreenState extends ConsumerState<ChatPageScreen> {
   @override
   void dispose() {
     super.dispose();
+  }
+}
+
+void printLongString(String text) {
+  const int chunkSize = 800;
+  for (int i = 0; i < text.length; i += chunkSize) {
+    print(text.substring(
+        i, i + chunkSize > text.length ? text.length : i + chunkSize));
   }
 }

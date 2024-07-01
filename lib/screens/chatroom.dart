@@ -86,54 +86,12 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     });
   }
 
-  // Future<void> fetchInitialData() async {
-  //   try {
-  //     String token = await getToken();
-  //     final authToken = 'Bearer ${token}';
-
-  //     print("接收聊天室數據");
-
-  //     String url =
-  //         'https://randojavabackend.zeabur.app/api/messages?chatroomId=${widget.chatroomId}';
-  //     // 'https://randojavabackend.zeabur.app/api/chatroom/${chatroomId.toString()}';
-
-  //     final response = await http.get(
-  //       Uri.parse(url),
-  //       headers: {
-  //         'Authorization': authToken,
-  //       },
-  //     );
-  //     if (response.statusCode == 200) {
-  //       String body = utf8.decode(response.bodyBytes);
-  //       Iterable chatroomMap = json.decode(body);
-  //       List<ChatMessage> chatMessages =
-  //           chatroomMap.map((room) => ChatMessage.fromJson(room)).toList();
-
-  //       setState(() {
-  //         messages = chatMessages; // Assuming messages are part of ChatRoom
-  //         isLoading = false;
-  //       });
-  //     }
-  //   } catch (e) {
-  //     print('Error fetching initial data: $e');
-  //     setState(() {
-  //       isLoading = false;
-  //     });
-  //   }
-
-  //   final webSocketServiceNotifier = ref.read(webSocketServiceNotifierProvider);
-  //   webSocketServiceNotifier.fetchInitialData(
-  //       'ws://randojavabackend.zeabur.app/ws/chatRoomMessages/${widget.currentUserId}');
-  // }
-
   Future<ChatRoom> fetchOtherSideUserData(int chatroomId) async {
     String token = await getToken();
-    final authToken = 'Bearer ${token}';
-
-    print("Fetching other side user data");
+    final authToken = 'Bearer $token';
 
     String url =
-        'https://randojavabackend.zeabur.app/api/chatroom/${chatroomId.toString()}/?is_chat=no';
+        'https://randojavabackend.zeabur.app/api/chatroom/$chatroomId/?is_chat=no';
 
     final response = await http.get(
       Uri.parse(url),
@@ -143,11 +101,9 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     );
     if (response.statusCode == 200) {
       String body = utf8.decode(response.bodyBytes);
-      Iterable chatroomMap = json.decode(body);
+      Map<String, dynamic> chatroomMap = json.decode(body);
 
-      List<ChatRoom> chatroomList =
-          chatroomMap.map((room) => ChatRoom.fromJson(room)).toList();
-      ChatRoom chatroom = chatroomList.first;
+      ChatRoom chatroom = ChatRoom.fromJson(chatroomMap);
       return chatroom;
     } else {
       throw Exception('Failed to load chatroom data');
@@ -176,7 +132,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
 
         if (response.statusCode == 200) {
           String body = utf8.decode(response.bodyBytes);
-          print('Message sent: $body');
+          // print('Message sent: $body');
         } else {
           print('Failed to send message. Status code: ${response.statusCode}');
           print('Response body: ${response.body}');
@@ -483,9 +439,11 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
   }
 
   Widget fetchMessageData() {
-    final webSocketServiceNotifier = ref.read(webSocketServiceNotifierProvider);
+    // final webSocketServiceNotifier = ref.read(webSocketServiceNotifierProvider);
+    final chatMessagesStream =
+        ref.watch(webSocketServiceNotifierProvider.notifier).chatMessageStream;
 
-    final chatMessagesStream = webSocketServiceNotifier.chatMessageStream;
+    // final chatMessagesStream = webSocketServiceNotifier.chatMessageStream;
 
     print('接收訊息數據');
 
@@ -524,22 +482,17 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
           if (index == 0) {
             return ListTile(
               title: FutureBuilder(
-                future: chatRoomFuture,
+                future: fetchOtherSideUserData(widget.chatroomId),
                 builder: (BuildContext context,
                     AsyncSnapshot<ChatRoom> asyncSnapshot) {
                   if (asyncSnapshot.hasError) {
                     return Text('Errorssss: ${asyncSnapshot.error}');
                   }
 
-                  // 使用 asyncSnapshot.hasData 來檢查是否有可用的資料。
-                  // 如果 asyncSnapshot.data 為 null 或者 asyncSnapshot.data 為空，
-                  // 則顯示 CircularProgressIndicator。
                   if (asyncSnapshot.connectionState ==
                       ConnectionState.waiting) {
                     return CircularProgressIndicator();
                   }
-
-                  // 如果有可用的資料，則顯示聊天訊息列表。
 
                   return Row(
                     children: [
@@ -702,10 +655,42 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                                               textAlign: TextAlign.center,
                                             )
                                           : initialData[index - 1].image != null
-                                              ?
-                                              // ? Text('test')
-                                              Image.network(
-                                                  '${initialData[index - 1].image}')
+                                              ? Image.network(
+                                                  '${initialData[index - 1].image}',
+                                                  loadingBuilder:
+                                                      (BuildContext context,
+                                                          Widget child,
+                                                          ImageChunkEvent?
+                                                              loadingProgress) {
+                                                    if (loadingProgress ==
+                                                        null) {
+                                                      return child; // 图像已完成加载时返回的widget
+                                                    } else {
+                                                      return Center(
+                                                        child:
+                                                            CircularProgressIndicator(
+                                                          value: loadingProgress
+                                                                      .expectedTotalBytes !=
+                                                                  null
+                                                              ? loadingProgress
+                                                                      .cumulativeBytesLoaded /
+                                                                  loadingProgress
+                                                                      .expectedTotalBytes!
+                                                              : null,
+                                                        ),
+                                                      ); // 图像加载时返回的widget
+                                                    }
+                                                  },
+                                                  errorBuilder: (BuildContext
+                                                          context,
+                                                      Object exception,
+                                                      StackTrace? stackTrace) {
+                                                    return Center(
+                                                      child:
+                                                          CircularProgressIndicator(), // 如果加载失败，也显示加载指示器
+                                                    );
+                                                  },
+                                                )
                                               : Container(),
                                     ),
                                   ],
@@ -757,10 +742,37 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
                                     textAlign: TextAlign.center,
                                   )
                                 : initialData[index - 1].image != null
-                                    ?
-                                    // ? Text('test')
-                                    Image.network(
-                                        '${initialData[index - 1].image}')
+                                    ? Image.network(
+                                        '${initialData[index - 1].image}',
+                                        loadingBuilder: (BuildContext context,
+                                            Widget child,
+                                            ImageChunkEvent? loadingProgress) {
+                                          if (loadingProgress == null) {
+                                            return child; // 图像已完成加载时返回的widget
+                                          } else {
+                                            return Center(
+                                              child: CircularProgressIndicator(
+                                                value: loadingProgress
+                                                            .expectedTotalBytes !=
+                                                        null
+                                                    ? loadingProgress
+                                                            .cumulativeBytesLoaded /
+                                                        loadingProgress
+                                                            .expectedTotalBytes!
+                                                    : null,
+                                              ),
+                                            ); // 图像加载时返回的widget
+                                          }
+                                        },
+                                        errorBuilder: (BuildContext context,
+                                            Object exception,
+                                            StackTrace? stackTrace) {
+                                          return Center(
+                                            child:
+                                                CircularProgressIndicator(), // 如果加载失败，也显示加载指示器
+                                          );
+                                        },
+                                      )
                                     : Container(),
                           ),
                         ],

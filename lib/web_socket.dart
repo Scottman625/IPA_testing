@@ -10,6 +10,7 @@ import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import './screens/chat_list.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WebSocketService extends StateNotifier<List<ChatRoom>> {
   // BehaviorSubject<dynamic>? _subject;
@@ -29,9 +30,8 @@ class WebSocketService extends StateNotifier<List<ChatRoom>> {
           stompClient.subscribe(
             destination: '/topic/chatRoomMessages_$userId',
             callback: (frame) {
-              Map<String, dynamic>? result = json.decode(frame.body!);
-              // print(result);
-              _subject.add(jsonEncode(result));
+              Map<String, dynamic> result = json.decode(frame.body!);
+              _handleNewMessage(result);
             },
           );
 
@@ -57,6 +57,35 @@ class WebSocketService extends StateNotifier<List<ChatRoom>> {
     stompClient.activate();
   }
 
+  void _handleNewMessage(Map<String, dynamic> result) {
+    try {
+      if (result.containsKey('chatroom')) {
+        var chatroomMap = result['chatroom'] as Map<String, dynamic>;
+
+        ChatRoom newChatRoom = ChatRoom.fromJson(chatroomMap);
+
+        state.removeWhere((chatRoom) => chatRoom.id == newChatRoom.id);
+        state.insert(0, newChatRoom);
+
+        _subject.add(jsonEncode({'chatroom': state}));
+        _saveChatRoomsToCache(state);
+      }
+      if (result.containsKey('messages')) {
+        List<dynamic> messageList = result['messages'];
+
+        List<ChatMessage> newMessages =
+            messageList.map((e) => ChatMessage.fromJson(e)).toList();
+        printInParts("newMessages: ${newMessages.toString()}", 400);
+        _subject.add(jsonEncode({'messages': newMessages}));
+      } else {
+        print(
+            'The key "chatroom" or "messages" does not exist in the result map.');
+      }
+    } catch (e) {
+      print('Error in _handleNewMessage: $e');
+    }
+  }
+
   BehaviorSubject<dynamic> get subject => _subject;
   Stream<dynamic> get messageStream => _subject.stream;
 
@@ -75,28 +104,23 @@ class WebSocketService extends StateNotifier<List<ChatRoom>> {
     }
   }
 
-  // Stream<List<ChatRoom>> get chatRoomsStream {
-  //   return _subject.stream.transform(
-  //     StreamTransformer.fromHandlers(
-  //       handleData: (jsonString, sink) {
-  //         if (jsonString != null && jsonString.isNotEmpty) {
-  //           try {
-  //             var map = jsonDecode(jsonString);
-  //             printInParts(map.toString(), 500);
-  //             if (map['chatrooms'] != null) {
-  //               List<dynamic> list = map['chatrooms'];
+  Future<void> _saveChatRoomsToCache(List<ChatRoom> chatRooms) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> chatRoomsJson =
+        chatRooms.map((chatRoom) => jsonEncode(chatRoom.toJson())).toList();
+    await prefs.setStringList('chatroom_list', chatRoomsJson);
+  }
 
-  //               List<ChatRoom> chatRooms =
-  //                   list.map((e) => ChatRoom.fromJson(e)).toList();
-
-  //               sink.add(chatRooms);
-  //             }
-  //           } catch (e) {}
-  //         }
-  //       },
-  //     ),
-  //   );
-  // }
+  Future<List<ChatRoom>> _loadChatRoomsFromCache() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String>? chatRoomsJson = prefs.getStringList('chatroom_list');
+    if (chatRoomsJson != null) {
+      return chatRoomsJson
+          .map((chatRoomJson) => ChatRoom.fromJson(jsonDecode(chatRoomJson)))
+          .toList();
+    }
+    return [];
+  }
 
   Stream<List<ChatRoom>> get chatRoomsStream {
     return _subject.stream.transform(
@@ -105,13 +129,14 @@ class WebSocketService extends StateNotifier<List<ChatRoom>> {
           if (jsonString != null && jsonString.isNotEmpty) {
             try {
               var map = jsonDecode(jsonString);
-              printInParts(map.toString(), 300);
+              // printInParts(map.toString(), 300);
               List<dynamic> list = map['chatroom'] ?? [];
-              List<ChatRoom> newMessages =
+              List<ChatRoom> newChatRooms =
                   list.map((e) => ChatRoom.fromJson(e)).toList();
 
-              state = [...state, ...newMessages];
+              state = [...newChatRooms];
               sink.add(state);
+              _saveChatRoomsToCache(state); // Save updated state to cache
             } catch (e) {
               sink.addError(e);
             }
@@ -130,7 +155,7 @@ class WebSocketService extends StateNotifier<List<ChatRoom>> {
           if (jsonString != null && jsonString.isNotEmpty) {
             try {
               var map = jsonDecode(jsonString);
-              // printInParts(map.toString(), 500);
+              printInParts("chatMessageStream: ${map.toString()}", 400);
               List<dynamic> list = map['messages'] ?? [];
 
               List<ChatMessage> messages =
