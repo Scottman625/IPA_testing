@@ -30,7 +30,7 @@ class WebSocketService extends StateNotifier<List<ChatRoom>> {
             destination: '/topic/chatRoomMessages_$userId',
             callback: (frame) {
               Map<String, dynamic>? result = json.decode(frame.body!);
-              print(result);
+              // print(result);
               _subject.add(jsonEncode(result));
             },
           );
@@ -69,7 +69,7 @@ class WebSocketService extends StateNotifier<List<ChatRoom>> {
     try {
       List<ChatRoom> initialData = await fetchChatRooms();
       state = [...state, ...initialData];
-      _subject.add(jsonEncode({'messages': initialData}));
+      _subject.add(jsonEncode({'chatroom': initialData}));
     } catch (e) {
       _subject.addError(e);
     }
@@ -105,7 +105,8 @@ class WebSocketService extends StateNotifier<List<ChatRoom>> {
           if (jsonString != null && jsonString.isNotEmpty) {
             try {
               var map = jsonDecode(jsonString);
-              List<dynamic> list = map['messages'] ?? [];
+              printInParts(map.toString(), 300);
+              List<dynamic> list = map['chatroom'] ?? [];
               List<ChatRoom> newMessages =
                   list.map((e) => ChatRoom.fromJson(e)).toList();
 
@@ -129,7 +130,7 @@ class WebSocketService extends StateNotifier<List<ChatRoom>> {
           if (jsonString != null && jsonString.isNotEmpty) {
             try {
               var map = jsonDecode(jsonString);
-              printInParts(map.toString(), 500);
+              // printInParts(map.toString(), 500);
               List<dynamic> list = map['messages'] ?? [];
 
               List<ChatMessage> messages =
