@@ -91,7 +91,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     final authToken = 'Bearer $token';
 
     String url =
-        'https://randojavabackend.zeabur.app/api/chatroom/$chatroomId/?is_chat=no';
+        'https://park.stockfunction.cloud/api/chatroom/$chatroomId/?is_chat=no';
 
     final response = await http.get(
       Uri.parse(url),
@@ -121,7 +121,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
       if (content.isNotEmpty) {
         final response = await http.post(
           Uri.parse(
-              'https://randojavabackend.zeabur.app/api/messages?chatroomId=$chatroomId'),
+              'https://park.stockfunction.cloud/api/messages?chatroomId=$chatroomId'),
           headers: {
             'Authorization': authToken,
           },
@@ -141,7 +141,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
         var request = http.MultipartRequest(
           'POST',
           Uri.parse(
-              'https://randojavabackend.zeabur.app/api/messages?chatroomId=$chatroomId'),
+              'https://park.stockfunction.cloud/api/messages?chatroomId=$chatroomId'),
         );
 
         request.headers.addAll({
@@ -195,7 +195,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     WidgetsBinding.instance.removeObserver(this);
     webSocketServiceNotifier?.disconnectWebSocket();
     String url =
-        'https://randojavabackend.zeabur.app/api/refresh_chatMessages?chatroom_id=${widget.chatroomId}';
+        'https://park.stockfunction.cloud/api/refresh_chatMessages?chatroom_id=${widget.chatroomId}';
     final response = await http.post(
       Uri.parse(url),
       headers: {
@@ -212,7 +212,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen>
     print('初始化Messages數據');
     // ChatRoom chatroom = await fetchOtherSideUserData(widget.chatroomId);
     String url =
-        'https://randojavabackend.zeabur.app/api/messages?chatroom_id=${widget.chatroomId}';
+        'https://park.stockfunction.cloud/api/messages?chatroom_id=${widget.chatroomId}';
     final response = await http.get(
       Uri.parse(url),
       headers: {

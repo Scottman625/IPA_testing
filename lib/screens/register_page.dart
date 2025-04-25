@@ -38,7 +38,7 @@ class _RegisterState extends ConsumerState<Register> {
         _formKey.currentState!.save();
 
         final url =
-            Uri.parse('https://randojavabackend.zeabur.app/api/user/register/');
+            Uri.parse('https://park.stockfunction.cloud/api/user/register/');
         var response = await http.post(url,
             // headers: {
             //   'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ class _RegisterState extends ConsumerState<Register> {
           print(auth_token);
           final response = await http.get(
               Uri.parse(
-                  'https://randojavabackend.zeabur.app/api/user/get_user_id/'),
+                  'https://park.stockfunction.cloud/api/user/get_user_id/'),
               headers: {
                 'Authorization': auth_token,
               });
@@ -66,7 +66,7 @@ class _RegisterState extends ConsumerState<Register> {
 
           ref.read(authStateProvider.notifier).login();
           // final _channel = WebSocketService()
-          //     .create('ws://randojavabackend.zeabur.app/chatRoomMessages/${UserId}/');
+          //     .create('ws://park.stockfunction.cloud/chatRoomMessages/${UserId}/');
           const chatroomList = '';
           Navigator.of(context).push(MaterialPageRoute(
               builder: (ctx) => MainPageScreen(

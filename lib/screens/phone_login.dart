@@ -40,7 +40,7 @@ class _PhoneLogInState extends ConsumerState<PhoneLogIn> {
         print(_phoneNumber);
         print(_password);
         final url =
-            Uri.parse('https://randojavabackend.zeabur.app/api/user/login/');
+            Uri.parse('https://park.stockfunction.cloud/api/user/login/');
         var response = await http.post(url,
             // headers: {
             //   'Content-Type': 'application/json',
@@ -56,7 +56,7 @@ class _PhoneLogInState extends ConsumerState<PhoneLogIn> {
           saveToken(token);
           String auth_token = 'Bearer ${token}';
           final response = await http.get(
-              Uri.parse('https://randojavabackend.zeabur.app/api/user/me/'),
+              Uri.parse('https://park.stockfunction.cloud/api/user/me/'),
               headers: {
                 'Authorization': auth_token,
               });

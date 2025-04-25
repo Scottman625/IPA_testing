@@ -23,7 +23,7 @@ import '../models/chatRoom.dart';
 //   final userId = ref.watch(userIdProvider);
 //   print('userID: $userId');
 //   return WebSocketServiceNotifier(
-//       'ws://randojavabackend.zeabur.app/ws/chatRoomMessages/$userId');
+//       'ws://park.stockfunction.cloud/ws/chatRoomMessages/$userId');
 // });
 
 class WebSocketServiceNotifier extends StateNotifier<WebSocketService> {
@@ -57,5 +57,5 @@ final webSocketServiceNotifierProvider =
   final userId = ref.watch(userIdProvider);
   print('userID: $userId');
   return WebSocketServiceNotifier(
-      'ws://randojavabackend.zeabur.app/ws/chatRoomMessages/$userId');
+      'ws://park.stockfunction.cloud/ws/chatRoomMessages/$userId');
 });

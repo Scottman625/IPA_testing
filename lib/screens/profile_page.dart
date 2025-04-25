@@ -24,7 +24,7 @@ class _ProfilePageScreenState extends State<ProfilePageScreen> {
     String token = await getToken();
     String authToken = 'Bearer ${token}';
     final response = await http.get(
-      Uri.parse('https://randojavabackend.zeabur.app/api/user/get_user/'),
+      Uri.parse('https://park.stockfunction.cloud/api/user/get_user/'),
       headers: {
         'Authorization': authToken,
       },

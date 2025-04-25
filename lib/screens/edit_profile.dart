@@ -34,7 +34,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final token = await getToken();
     String auth_token = 'Bearer ${token}';
     final response = await http.get(
-      Uri.parse('https://randojavabackend.zeabur.app/api/user/me/'),
+      Uri.parse('https://park.stockfunction.cloud/api/user/me/'),
       headers: {
         'Authorization': auth_token,
       },
@@ -81,7 +81,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         final request = http.MultipartRequest(
           'POST',
           Uri.parse(
-              'https://randojavabackend.zeabur.app/api/user/update_user_images'),
+              'https://park.stockfunction.cloud/api/user/update_user_images'),
         );
 
         request.headers.addAll({
@@ -159,7 +159,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               String auth_token = 'Bearer ${token}';
                               final response = await http.delete(
                                 Uri.parse(
-                                    'https://randojavabackend.zeabur.app/api/user/update_user_images/${userImageId}/'),
+                                    'https://park.stockfunction.cloud/api/user/update_user_images/${userImageId}/'),
                                 headers: {
                                   'Authorization': auth_token,
                                 },

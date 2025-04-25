@@ -22,7 +22,7 @@ class WebSocketService extends StateNotifier<List<ChatRoom>> {
   WebSocketService(String url) : super([]) {
     fetchInitialData(url);
     String userId =
-        url.split("ws://randojavabackend.zeabur.app/ws/chatRoomMessages/")[1];
+        url.split("ws://park.stockfunction.cloud/ws/chatRoomMessages/")[1];
     stompClient = StompClient(
       config: StompConfig(
         url: url,

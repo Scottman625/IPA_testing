@@ -16,7 +16,7 @@ Future<List<ChatRoom>> fetchChatRooms() async {
   final token = await getToken();
   String auth_token = 'Bearer ${token}';
   final response = await http.get(
-    Uri.parse('https://randojavabackend.zeabur.app/api/chatroom'),
+    Uri.parse('https://park.stockfunction.cloud/api/chatroom'),
     headers: {
       'Authorization': auth_token,
     },
@@ -44,7 +44,7 @@ Future<List<User>> fetchMatches() async {
   final token = await getToken();
   String auth_token = 'Bearer ${token}';
   final response = await http.get(
-    Uri.parse('https://randojavabackend.zeabur.app/api/matched_not_chatted'),
+    Uri.parse('https://park.stockfunction.cloud/api/matched_not_chatted'),
     headers: {
       'Authorization': auth_token,
     },
@@ -153,7 +153,7 @@ class _ChatPageScreenState extends ConsumerState<ChatPageScreen> {
                                   String auth_token = 'Bearer ${token}';
                                   final response = await http.delete(
                                       Uri.parse(
-                                          'https://randojavabackend.zeabur.app/api/chatroom'),
+                                          'https://park.stockfunction.cloud/api/chatroom'),
                                       headers: {
                                         'Authorization': auth_token,
                                       },
@@ -219,7 +219,7 @@ class _ChatPageScreenState extends ConsumerState<ChatPageScreen> {
   //   final token = await getToken();
   //   String auth_token = 'Bearer ${token}';
   //   final response = await http
-  //       .delete(Uri.parse('https://randojavabackend.zeabur.app/api/chatroom'), headers: {
+  //       .delete(Uri.parse('https://park.stockfunction.cloud/api/chatroom'), headers: {
   //     'Authorization': auth_token,
   //   }, body: {
   //     'otherSideUser_phone': otherSideUser_phone,
@@ -258,7 +258,7 @@ class _ChatPageScreenState extends ConsumerState<ChatPageScreen> {
       final webSocketServiceNotifier =
           ref.read(webSocketServiceNotifierProvider);
       webSocketServiceNotifier.fetchInitialData(
-          'ws://randojavabackend.zeabur.app/ws/chatRoomMessages/${widget.userId}');
+          'ws://park.stockfunction.cloud/ws/chatRoomMessages/${widget.userId}');
     });
   }
 
@@ -286,7 +286,7 @@ class _ChatPageScreenState extends ConsumerState<ChatPageScreen> {
     // print(auth_token);
 
     final getChatRoomtokenResponse = await http.post(
-        Uri.parse('https://randojavabackend.zeabur.app/api/chatroom'),
+        Uri.parse('https://park.stockfunction.cloud/api/chatroom'),
         headers: {
           'Authorization': authToken,
         },
